@@ -1,0 +1,57 @@
+---
+# Persistent Volume Claim for MySQL Data
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: mysql-pvc
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 5Gi
+---
+# MySQL Deployment
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: hello-mysql
+spec:
+  selector:
+    matchLabels:
+      app: hello-mysql
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: hello-mysql
+    spec:
+      containers:
+        - name: mysql
+          image: mysql:latest
+          ports:
+            - containerPort: 1000
+          env:
+            - name: MYSQL_ROOT_PASSWORD
+              value: "root"  # Set the root password from your Docker run command
+          volumeMounts:
+            - name: mysql-storage
+              mountPath: /var/lib/mysql
+      volumes:
+        - name: mysql-storage
+          persistentVolumeClaim:
+            claimName: mysql-pvc
+---
+# MySQL Service
+apiVersion: v1
+kind: Service
+metadata:
+  name: hello-mysql
+spec:
+  ports:
+    - port: 1000
+      targetPort: 1000
+      nodePort: 31000 # This exposes MySQL on port 31000
+  selector:
+    app: hello-mysql
+  type: NodePort

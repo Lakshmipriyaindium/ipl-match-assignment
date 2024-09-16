@@ -1,0 +1,32 @@
+spring:
+  application:
+    name: spring-boot-assignment
+  datasource:
+    password: root
+    username: root
+    url: jdbc:mysql://localhost:3306/assignment
+    driver-class-name: com.mysql.cj.jdbc.Driver
+server:
+  port: 8088
+
+  kafka:
+    bootstrap-servers: localhost:9092
+    properties:
+      security.protocol: PLAINTEXT
+      SASL_MECHANISM: PLAIN
+    producer:
+      value-serializer: org.apache.kafka.common.serialization.StringSerializer
+  data:
+    redis:
+      host: localhost
+      port: 6379
+management:
+  endpoints:
+    web:
+      exposure:
+        include: '*'
+  endpoint:
+    health:
+      show-details: always
+    shutdown:
+      enabled: true
