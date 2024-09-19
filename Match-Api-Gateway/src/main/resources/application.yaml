@@ -1,54 +1,53 @@
 spring:
   application:
-    name: Match-Api-Gateway
+    name: match-api-gateway
   cloud:
     gateway:
       routes:
         - id: get-match-by-id
-          uri: http://localhost:8088
+          uri: ${MATCH_API_URI:http://localhost:8088}
           predicates:
-            - Path=/api/matches/{id}
+            - Path=/api/matches/**
         - id: create-match
-          uri: http://localhost:8088
+          uri: ${MATCH_API_URI:http://localhost:8088}
           predicates:
             - Path=/api/matches/matches
         - id: get-matches-by-player-name
-          uri: http://localhost:8088
+          uri: ${MATCH_API_URI:http://localhost:8088}
           predicates:
             - Path=/api/matches/player/**
         - id: get-cumulative-score
-          uri: http://localhost:8088
+          uri: ${MATCH_API_URI:http://localhost:8088}
           predicates:
             - Path=/api/matches/cumulative-score
         - id: get-wickets-summary-by-bowler
-          uri: http://localhost:8088
+          uri: ${MATCH_API_URI:http://localhost:8088}
           predicates:
             - Path=/api/matches/wickets
         - id: get-players-info
-          uri: http://localhost:8088
+          uri: ${MATCH_API_URI:http://localhost:8088}
           predicates:
             - Path=/api/matches/players
         - id: get-referees-by-match-number
-          uri: http://localhost:8088
+          uri: ${MATCH_API_URI:http://localhost:8088}
           predicates:
             - Path=/api/matches/referees
         - id: get-strike-rate
-          uri: http://localhost:8088
+          uri: ${MATCH_API_URI:http://localhost:8088}
           predicates:
             - Path=/api/matches/strike-rate
         - id: get-scores-by-date
-          uri: http://localhost:8088
+          uri: ${MATCH_API_URI:http://localhost:8088}
           predicates:
             - Path=/api/matches/scores
         - id: get-top-players
-          uri: http://localhost:8088
+          uri: ${MATCH_API_URI:http://localhost:8088}
           predicates:
             - Path=/api/matches/top-players
         - id: get-top-wicket-takers
-          uri: http://localhost:8088
+          uri: ${MATCH_API_URI:http://localhost:8088}
           predicates:
             - Path=/api/matches/top-wicket-takers
-
 server:
   port: 9000
 management:
@@ -61,3 +60,4 @@ management:
       show-details: always
     shutdown:
       enabled: true
+#incoming request must satisfy to be routed. A predicate is a condition that filters requests
