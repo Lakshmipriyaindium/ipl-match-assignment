@@ -14,6 +14,8 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.MediaType;
 import org.springframework.kafka.core.KafkaTemplate;
+import org.springframework.security.test.context.support.WithMockUser;
+import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.web.servlet.MockMvc;
 
@@ -30,6 +32,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 @ExtendWith(SpringExtension.class)
 @WebMvcTest(MatchController.class)
+@ActiveProfiles("qa")
 public class MatchControllerTest {
 
     @Autowired
@@ -75,67 +78,69 @@ public class MatchControllerTest {
     private ObjectMapper objectMapper;
 
     @Test
+    @WithMockUser
     public void testGetMatchById() throws Exception {
-        // Arrange: Mock data setup
         Match match = new Match();
-        match.setMatchId(1); // Set the match ID
+        match.setMatchId(1);
 
-        // Mock the service response
+
         when(matchService.getMatchById(1)).thenReturn(match);
 
-        // Act & Assert: Perform the GET request and verify the response
+
         mockMvc.perform(get("/api/matches/1"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.matchId").value(1));  // Use 'matchId' instead of 'id'
 
-        // Verify the service method call
         verify(matchService, times(1)).getMatchById(1);
         verify(kafkaTemplate, times(1)).send(anyString(), anyString());
     }
 
     @Test
+    @WithMockUser
     public void testGetMatchesByPlayerName() throws Exception {
-        // Mock data setup
+
         String playerName = "V Kohli";
         List<Match> matches = new ArrayList<>();
-        matches.add(new Match());  // assuming a no-arg constructor in Match
+        matches.add(new Match());
 
-        // Mocking the service
+
         when(playerService.findAllMatchesByPlayerName(playerName)).thenReturn(matches);
 
-        // Perform the GET request and verify response
+
         mockMvc.perform(get("/api/matches/player/{playerName}", playerName)
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$[0]").exists());  // assuming match data exists
+                .andExpect(jsonPath("$[0]").exists());
 
-        // Verify that the service method was called
+
         verify(playerService, times(1)).findAllMatchesByPlayerName(playerName);
     }
 
     @Test
+    @WithMockUser
     public void testCreateMatch() throws Exception {
-        // Create a Match object with the expected matchId
+
         Match match = new Match();
         match.setMatchId(1);
 
-        // Mock the service to return the created Match object
+
         when(cricketMatchService.insertMatchData(anyString())).thenReturn(match);
 
-        // Perform the POST request with the correct JSON payload
+
         mockMvc.perform(post("/api/matches/matches")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("{\"id\":1}")) // Adjust payload if necessary
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.matchId").value(1)); // Update to expect matchId
 
-        // Verify interactions with mocks
+
         verify(cricketMatchService, times(1)).insertMatchData(anyString());
         verify(kafkaTemplate, times(1)).send(anyString(), anyString());
     }
 
 
     @Test
+    @WithMockUser
     public void testGetCumulativeScore() throws Exception {
         when(scoreService.getCumulativeScore("Sachin Tendulkar")).thenReturn("100");
 
@@ -149,6 +154,7 @@ public class MatchControllerTest {
     }
 
     @Test
+    @WithMockUser
     public void testGetWicketsSummaryByBowler() throws Exception {
         when(wicketService.getWicketsSummaryByBowler("Anil Kumble")).thenReturn("5 wickets");
 
@@ -162,6 +168,7 @@ public class MatchControllerTest {
     }
 
     @Test
+    @WithMockUser
     public void testGetPlayersInfo() throws Exception {
         when(teamService.getPlayersInfo("India", 2)).thenReturn(Collections.emptyList());
 
@@ -176,6 +183,7 @@ public class MatchControllerTest {
     }
 
     @Test
+    @WithMockUser
     public void testGetRefereesByMatchNumber() throws Exception {
         when(officialService.findRefereesByMatchNumber(3)).thenReturn(Collections.emptyList());
 
@@ -189,6 +197,7 @@ public class MatchControllerTest {
     }
 
     @Test
+    @WithMockUser
     public void testGetStrikeRate() throws Exception {
         when(strikeRateService.getStrikeRate("Rohit Sharma", 5)).thenReturn("75.00");
 
@@ -203,6 +212,7 @@ public class MatchControllerTest {
     }
 
     @Test
+    @WithMockUser
     public void testGetMatchScores() throws Exception {
         when(matchScoreService.getMatchScoresByDate(any())).thenReturn(Collections.emptyList());
 
@@ -216,41 +226,43 @@ public class MatchControllerTest {
     }
 
     @Test
+    @WithMockUser
     public void testGetTopPlayers() throws Exception {
-        // Mock the Pageable
+
         Pageable pageable = PageRequest.of(0, 10); // Or use any other appropriate Pageable implementation
 
-        // Mock service to return an empty Page
+
         when(topPlayersService.getTopPlayersByMatch(pageable)).thenReturn(Page.empty());
 
-        // Perform the GET request and assert the response
+
         mockMvc.perform(get("/api/matches/top-players")
                         .param("page", "0")
                         .param("size", "10"))
                 .andExpect(status().isOk())
                 .andExpect(content().json("{\"content\":[],\"pageable\":\"INSTANCE\",\"last\":true,\"totalPages\":1,\"totalElements\":0,\"size\":0,\"number\":0,\"sort\":{\"empty\":true,\"unsorted\":true,\"sorted\":false},\"numberOfElements\":0,\"first\":true,\"empty\":true}"));
 
-        // Verify interactions with mocks
+
         verify(topPlayersService, times(1)).getTopPlayersByMatch(any(Pageable.class));
         verify(kafkaTemplate, times(1)).send(anyString(), anyString());
     }
 
     @Test
+    @WithMockUser
     public void testGetTopWicketTakers() throws Exception {
-        // Mock Pageable
-        Pageable pageable = PageRequest.of(0, 10); // Adjust as necessary
 
-        // Mock the service to return an empty Page
+        Pageable pageable = PageRequest.of(0, 10);
+
+
         when(topWicketTakerService.getTopWicketTakers(pageable)).thenReturn(Page.empty());
 
-        // Perform the GET request and assert the response
+
         mockMvc.perform(get("/api/matches/top-wicket-takers")
                         .param("page", "0")
                         .param("size", "10"))
                 .andExpect(status().isOk())
                 .andExpect(content().json("{\"content\":[],\"pageable\":\"INSTANCE\",\"last\":true,\"totalPages\":1,\"totalElements\":0,\"size\":0,\"number\":0,\"sort\":{\"empty\":true,\"unsorted\":true,\"sorted\":false},\"numberOfElements\":0,\"first\":true,\"empty\":true}"));
 
-        // Verify interactions with mocks
+
         verify(topWicketTakerService, times(1)).getTopWicketTakers(any(Pageable.class));
         verify(kafkaTemplate, times(1)).send(anyString(), anyString());
     }
