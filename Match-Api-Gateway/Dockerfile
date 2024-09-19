@@ -2,7 +2,6 @@ FROM eclipse-temurin:22-alpine
 
 COPY target/match-api-gateway-0.0.1.jar app.jar
 EXPOSE 9000
-ENV KAFKA_HOST=host.docker.internal:9094
-ENV REDIS_HOST=host.docker.internal
-ENV MYSQL_URL=jdbc:mysql://host.docker.internal:1000/assignment
-ENTRYPOINT ["java", "-jar", "-Dspring.kafka.bootstrap-servers=${KAFKA_HOST}", "-Dspring.data.redis.host=${REDIS_HOST}", "-Dspring.datasource.url=${MYSQL_URL}", "/app.jar"]
+
+ENV MATCH_API_URI=http://host.docker.internal:8088
+ENTRYPOINT ["java", "-jar", "/app.jar"]
